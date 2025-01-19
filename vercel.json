@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "*.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "fucntions": {
+     "limits": {
+        "maxLambdaSize": "30mb"
+     }
+  }
+}
