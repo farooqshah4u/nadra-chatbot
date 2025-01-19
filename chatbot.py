@@ -48,7 +48,7 @@ def get_all_chats_for_user(userid):
     user_chats = list(user_chats_collection.find({'userid': userid}))
     message = []
 
-    for chat in reversed(chats):
+    for chat in reversed(user_chats):
         if chat["role"] == "user":
             messages.append(HumanMessage(chat["content"]))
         elif chat["role"] == "assistant":
