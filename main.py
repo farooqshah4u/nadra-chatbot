@@ -18,6 +18,6 @@ app.add_middleware(
 )
 
 @app.get("/ask")
-def handle_question(question:str):
-    response = chatbot(question)
+def handle_question(userid:str,question:str):
+    response = chatbot(userid,question)
     return JSONResponse(content={"response": response})
