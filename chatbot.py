@@ -9,10 +9,11 @@ from datetime import datetime
 load_dotenv()
 
 # Connect to MongoDB
-client = MongoClient("mongodb+srv://farooqshah4u:ptcl2212411@cluster0.3gtkw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")  # Add your MongoDB URI here
+client = MongoClient("mongodb+srv://farooqshah4u:ptcl2212411@cluster0.3gtkw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 db = client['chat_db']  # Database name
 user_chats_collection = db['user_chats']  # Collection for user questions
 assistant_chats_collection = db['assistant_chats']  # Collection for assistant responses
+session_collection = db['sessions']  # Collection to manage user sessions
 
 PROMPT = """ You are a chatbot that speaks Roman Urdu with English words.
 You will answer everey question in Urdu no matter what.
@@ -28,7 +29,22 @@ Tnis is the user question: {question}
 """
 
 model = ChatOpenAI(model='gpt-4o-mini')
-messages = [SystemMessage(PROMPT)]
+
+# Function to generate a sequential user ID
+def generate_user_id():
+    last_session = session_collection.find_one(sort=[('user_id', -1)])
+    if last_session:
+        last_user_id = int(last_session['user_id'].split("_")[-1])
+        new_user_id = f"user_{last_user_id + 1}"
+    else:
+        new_user_id = "user_1"
+    return new_user_id
+
+# Function to start a new session and assign a user ID
+def start_session():
+    user_id = generate_user_id()
+    session_collection.insert_one({'user_id': user_id, 'created_at': datetime.now()})
+    return user_id
 
 # Function to save chat data to MongoDB
 def save_chat_to_db(userid, role, content):
@@ -46,31 +62,43 @@ def save_chat_to_db(userid, role, content):
 # Function to retrieve all chats for a specific user
 def get_all_chats_for_user(userid):
     user_chats = list(user_chats_collection.find({'userid': userid}))
-    message = []
-
-    for chat in reversed(user_chats):
+    messages = []
+    for chat in user_chats:
         if chat["role"] == "user":
             messages.append(HumanMessage(chat["content"]))
         elif chat["role"] == "assistant":
             messages.append(AIMessage(chat["content"]))
-    
     return messages
 
 # Modified chatbot function
 def chatbot(userid, question):
-    data = get_all_chats_for_user(userid)
-    if data:
-        messages.extend(data)
+    messages = [SystemMessage(PROMPT)]
+    # Retrieve chat history for the session
+    chat_history = get_all_chats_for_user(userid)
+    if chat_history:
+        messages.extend(chat_history)
     messages.append(HumanMessage(question))
-    
+
     # Save the user question in the database
     save_chat_to_db(userid, "user", question)
-    
+
     # Get the assistant's response
     response = model.invoke(messages)
     assistant_response = response.content
-    
+
     # Save the assistant's response in the database
     save_chat_to_db(userid, "assistant", assistant_response)
-    
+
     return assistant_response
+
+# Example usage
+if __name__ == "__main__":
+    user_id = start_session()
+    print(f"New session started with user_id: {user_id}")
+    while True:
+        question = input("User: ")
+        if question.lower() == "exit":
+            print("Ending session.")
+            break
+        response = chatbot(user_id, question)
+        print(f"Chatbot: {response}")
