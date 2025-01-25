@@ -92,13 +92,13 @@ def chatbot(userid, question):
     return assistant_response
 
 # Example usage
-if __name__ == "__main__":
-    user_id = start_session()
-    print(f"New session started with user_id: {user_id}")
-    while True:
-        question = input("User: ")
-        if question.lower() == "exit":
-            print("Ending session.")
-            break
-        response = chatbot(user_id, question)
-        print(f"Chatbot: {response}")
+#if __name__ == "__main__":
+#    user_id = start_session()
+#    print(f"New session started with user_id: {user_id}")
+#    while True:
+#        question = input("User: ")
+#        if question.lower() == "exit":
+#            print("Ending session.")
+#           break
+#        response = chatbot(user_id, question)
+#        print(f"Chatbot: {response}")
