@@ -44,6 +44,7 @@ def generate_user_id():
 def start_session():
     user_id = generate_user_id()
     session_collection.insert_one({'user_id': user_id, 'created_at': datetime.now()})
+    print(f"New session started. Assigned user_id: {user_id}")
     return user_id
 
 # Function to save chat data to MongoDB
@@ -92,6 +93,17 @@ def chatbot(userid, question):
     return assistant_response
 
 # Example usage
+# Main program loop
+if __name__ == "__main__":
+    # Automatically assign a new user ID when the program starts
+    user_id = start_session()
+    while True:
+        question = input("User: ")
+        if question.lower() == "exit":
+            print("Ending session.")
+            break
+        response = chatbot(user_id, question)
+        print(f"Chatbot: {response}")
 #if __name__ == "__main__":
 #    user_id = start_session()
 #    print(f"New session started with user_id: {user_id}")
