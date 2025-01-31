@@ -1,4 +1,5 @@
 import os
+os.environ['USER_AGENT'] = 'myagent'
 from langchain_community.document_loaders import WebBaseLoader
 
 def extract_combined_text(pages):
