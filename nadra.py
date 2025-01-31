@@ -67,12 +67,12 @@ def web_database(question):
     if not docs:
         return "No relevant data could be retrieved at the moment. Please try again later."
 
-    try:
-        vector_store = InMemoryVectorStore.from_documents(docs, OpenAIEmbeddings())
-        documents = vector_store.similarity_search(question)
-        return extract_combined_text(documents)
-    except Exception as e:
-        return f"An error occurred during similarity search: {e}"
+    # try:
+    #     vector_store = InMemoryVectorStore.from_documents(docs, OpenAIEmbeddings())
+    #     documents = vector_store.similarity_search(question)
+    #     return extract_combined_text(documents)
+    # except Exception as e:
+    #     return f"An error occurred during similarity search: {e}"
 
 
 # import os
