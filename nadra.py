@@ -1,15 +1,14 @@
 import os
 from langchain_community.document_loaders import WebBaseLoader
-from langchain_core.vectorstores import InMemoryVectorStore
-from langchain_openai import OpenAIEmbeddings
 
 def extract_combined_text(pages):
     """
     Combines the page content of multiple documents into a single string.
     """
-    return " ".join([page.page_content for page in pages if page.page_content])
+    return " ".join([page.page_content for page in pages])
 
 def web_database(question):
+    loader = WebBaseLoader() # Initialize the WebBaseLoader
     """
     Fetches relevant information from NADRA's official websites and subdomains
     based on the given question.
@@ -56,16 +55,11 @@ def web_database(question):
     ]
 
     docs = []
-    for url in pages:
-        try:
-            loader = WebBaseLoader(url)
-            loaded_docs = loader.load()
-            docs.extend(loaded_docs)
-        except Exception as e:
-            print(f"Failed to load documents from {url}: {e}")
-
-    if not docs:
-        return "No relevant data could be retrieved at the moment. Please try again later."
+    for data in pages:
+        loader = WebBaseLoader(data)
+        for doc in loader.load():
+            docs.append(doc)
+    return extract_combined_text(docs)
 
     # try:
     #     vector_store = InMemoryVectorStore.from_documents(docs, OpenAIEmbeddings())
