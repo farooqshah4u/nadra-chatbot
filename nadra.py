@@ -1,6 +1,8 @@
 import os
-os.environ['USER_AGENT'] = 'myagent'
 from langchain_community.document_loaders import WebBaseLoader
+
+# Optional: set user agent if WebBaseLoader doesn't handle it automatically
+os.environ['USER_AGENT'] = 'myagent'
 
 def extract_combined_text(pages):
     """
@@ -9,11 +11,11 @@ def extract_combined_text(pages):
     return " ".join([page.page_content for page in pages])
 
 def web_database(question):
-    loader = WebBaseLoader() # Initialize the WebBaseLoader
     """
     Fetches relevant information from NADRA's official websites and subdomains
     based on the given question.
     """
+    # Cleaned list of URLs to avoid duplication
     pages = [
         "https://www.nadra.gov.pk",
         "https://ns.nadra.gov.pk",
@@ -25,7 +27,6 @@ def web_database(question):
         "https://webmail.nadra.gov.pk",
         "https://payment.nadra.gov.pk",
         "https://ftp.nadra.gov.pk",
-        "https://www.nadra.gov.pk",
         "https://mail.nadra.gov.pk",
         "https://autodiscover.nadra.gov.pk",
         "https://mail1.nadra.gov.pk",
@@ -54,13 +55,90 @@ def web_database(question):
         "https://passport.nadra.gov.pk",
         "https://poc.nadra.gov.pk"
     ]
-
+    
     docs = []
-    for data in pages:
-        loader = WebBaseLoader(data)
-        for doc in loader.load():
-            docs.append(doc)
+    # Initialize WebBaseLoader only once
+    loader = WebBaseLoader()
+
+    for url in pages:
+        try:
+            # Load documents for each URL
+            for doc in loader.load(url):
+                docs.append(doc)
+        except Exception as e:
+            print(f"Error loading {url}: {e}")
+    
+    # Return the combined text of all the documents
     return extract_combined_text(docs)
+
+
+
+#import os
+#os.environ['USER_AGENT'] = 'myagent'
+#from langchain_community.document_loaders #import WebBaseLoader
+
+#def extract_combined_text(pages):
+#    """
+#    Combines the page content of multiple #documents into a single string.
+#    """
+#    return " ".join([page.page_content for page in pages])
+
+#def web_database(question):
+#    loader = WebBaseLoader() # Initialize the WebBaseLoader
+#    """
+#    Fetches relevant information from #NADRA's official websites and subdomains
+#    based on the given question.
+#    """
+#    pages = [
+#        "https://www.nadra.gov.pk",
+#        "https://ns.nadra.gov.pk",
+#        "https://ftp2.nadra.gov.pk",
+#        "https://visa.nadra.gov.pk",
+#        "https://smtp.nadra.gov.pk",
+#        "https://vpn.nadra.gov.pk",
+#        "https://owa.nadra.gov.pk",
+#        "https://webmail.nadra.gov.pk",
+#        "https://payment.nadra.gov.pk",
+#        "https://ftp.nadra.gov.pk",
+#        "https://www.nadra.gov.pk",
+#        "https://mail.nadra.gov.pk",
+        #"https://autodiscover.nadra.gov.pk",
+#        "https://mail1.nadra.gov.pk",
+#        "https://vpn2.nadra.gov.pk",
+#        "https://test.nadra.gov.pk",
+#        "https://dms.nadra.gov.pk",
+#        "https://oma.nadra.gov.pk",
+#        "https://mailtest.nadra.gov.pk",
+#        "https://id.nadra.gov.pk",
+#        "https://email.nadra.gov.pk",
+#        "https://careers.nadra.gov.pk",
+#        "https://ns1.nadra.gov.pk",
+#        "https://nims.nadra.gov.pk",
+#        "https://e-sahulat.nadra.gov.pk",
+#        "https://ebil.nadra.gov.pk",
+        #"https://supremecourt.nadra.gov.pk",
+#        "https://succession.nadra.gov.pk",
+#        "https://ehsaas.nadra.gov.pk",
+#        "https://onlinemrp.nadra.gov.pk",
+        #"https://ehsaaslabour.nadra.gov.pk",
+#        "https://crms.nadra.gov.pk",
+#        "https://cdcp.nadra.gov.pk",
+#        "https://e-visa.nadra.gov.pk",
+        #"https://esahulat-cms.nadra.gov.pk",
+#        "https://nser.nadra.gov.pk",
+#        "https://passport.nadra.gov.pk",
+#        "https://poc.nadra.gov.pk"
+#    ]
+
+#    docs = []
+#    for data in pages:
+#        loader = WebBaseLoader(data)
+#        for doc in loader.load():
+#            docs.append(doc)
+#    return extract_combined_text(docs)
+
+
+
 
     # try:
     #     vector_store = InMemoryVectorStore.from_documents(docs, OpenAIEmbeddings())
